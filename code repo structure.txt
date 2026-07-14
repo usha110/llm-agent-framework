@@ -1,0 +1,57 @@
+python_agent/
+│
+├── .env
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── main.py                    # Entry point
+│
+├── config/
+│   ├── __init__.py
+│   └── settings.py            # OpenAI key, configs
+│
+├── agents/
+│   ├── __init__.py
+│   ├── planner.py             # Chooses which tool to call
+│   ├── executor.py            # Executes tool calls
+│   ├── memory.py              # Conversation memory
+│   └── agent.py               # Main agent orchestration
+│
+├── tools/
+│   ├── __init__.py
+│   ├── calculator.py
+│   ├── web_search.py
+│   ├── summarizer.py
+│   ├── translator.py
+│   └── weather.py
+│
+├── prompts/
+│   ├── __init__.py
+│   ├── system_prompt.py
+│   └── planner_prompt.py
+│
+├── llm/
+│   ├── __init__.py
+│   ├── client.py              # OpenAI client
+│   └── models.py              # Model selection
+│
+├── schemas/
+│   ├── __init__.py
+│   ├── tool_schema.py
+│   └── response_schema.py
+│
+├── utils/
+│   ├── __init__.py
+│   ├── logger.py
+│   ├── helpers.py
+│   └── formatter.py
+│
+├── tests/
+│   ├── test_calculator.py
+│   ├── test_summarizer.py
+│   └── test_agent.py
+│
+└── examples/
+    ├── calculator_example.py
+    ├── summarizer_example.py
+    └── multi_tool_example.py
