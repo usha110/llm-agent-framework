@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from typing import Any
 
 @dataclass
 class ExecutionResult:
     success: bool
     tool: str
-    output: str | None = None
+    output: Any = None
     error: str | None = None

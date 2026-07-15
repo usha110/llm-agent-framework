@@ -9,6 +9,7 @@ state = AgentState()
 while True:
 
     state.query = input("User: ")
+    print(f"DEBUG Query: {repr(state.query)}")
 
     if state.query.lower() in ["exit", "quit"]:
         break
@@ -20,6 +21,13 @@ while True:
     state.plan = choose_tool(state.memory.get_messages())
 
     print(state.plan)
+
+    if not state.plan["steps"]:
+        state.result = "I couldn't determine an appropriate tool for this request."
+        print(f"\nAssistant: {state.result}")
+        state.memory.add_assistant(state.result)
+        state.scratchpad.clear()
+        continue
 
     # Initial input to the first tool
     current_input = state.query
