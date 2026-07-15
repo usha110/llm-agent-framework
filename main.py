@@ -1,14 +1,10 @@
 from agent.planner import choose_tool
 from agent.executor import execute
-from agent.memory import ConversationMemory
-from agent.scratchpad import Scratchpad
-
+from agent.execution_result import ExecutionResult
+from agent.reflection import reflect
 from agent.state import AgentState
 
 state = AgentState()
-
-#memory = ConversationMemory()
-#scratchpad = Scratchpad()
 
 while True:
 
@@ -25,39 +21,74 @@ while True:
 
     print(state.plan)
 
-    state.result = state.query
+    # Initial input to the first tool
+    current_input = state.query
 
     for step in state.plan["steps"]:
 
-        result_before_execution = state.result
+        execution_result = execute(step, current_input)
 
-        execution = execute(step, state.result)
+        # Safety check
+        if not isinstance(execution_result, ExecutionResult):
+            print("Executor returned an invalid result.")
+            break
 
-        if not execution.success:
-            print(f"\nTool '{execution.tool}' failed")
-            print(f"Reason: {execution.error}")
-            state.result = f"Error: {execution.error}"
-            break   
+        # Tool failed
+        if not execution_result.success:
+            print(f"\nTool '{execution_result.tool}' failed")
+            print(f"Reason: {execution_result.error}")
 
-        state.result = execution.output
-        
+            current_input = f"Error: {execution_result.error}"
+            break
+
+        # -------------------------
+        # Reflection Step
+        # -------------------------
+        reflection_result = reflect(execution_result)
+
+        print("\nReflection")
+
+        print(f"Should Retry : {reflection_result.should_retry}")
+        print(f"Reason       : {reflection_result.reason}")
+            
+        print(f"Next Action  : {reflection_result.next_action}")
+
+        if reflection_result.should_retry:
+            print(f"Retry suggested: {reflection_result.reason}")
+
+        #if not reflection_result.success:
+            # print(reflection_result.feedback)
+
         state.scratchpad.add(
-            execution.tool,
+            execution_result.tool,
             {
-                "input": result_before_execution,
-                "success": execution.success,
-                "output": execution.output,
-                "error": execution.error,
-                "arguments": step.get("arguments", {})
+                "input": current_input,
+                "arguments": step.get("arguments", {}),
+                "success": execution_result.success,
+                "output": execution_result.output,
+                "reflection": {
+                    "should_retry": reflection_result.should_retry,
+                    "reason": reflection_result.reason,
+                    "next_action": reflection_result.next_action,
+                    },
+                "error": execution_result.error
             }
         )
 
-    print("\nScratchpad")
+        current_input = execution_result.output
 
+        print("\nReflection")
+        print(reflection_result)
+
+    #state.result = current_input
+    final_output = current_input
+    state.result = final_output
+
+    print("\nScratchpad")
     for item in state.scratchpad.get_entries():
         print(item)
 
-    print(f"Assistant: {state.result}")
+    print(f"\nAssistant: {state.result}")
 
     state.memory.add_assistant(state.result)
     state.scratchpad.clear()
