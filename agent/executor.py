@@ -25,6 +25,9 @@ def execute(step, input_data):
         or input_data
     )
 
+    if tool_input is None:
+        tool_input = input_data
+
     print(f"Executing: {tool_name}")
     print(f"Input: {tool_input}")
 

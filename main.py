@@ -3,6 +3,7 @@ from agent.executor import execute
 from agent.execution_result import ExecutionResult
 from agent.reflection import reflect
 from agent.state import AgentState
+from agent.state_graph import AgentStep
 
 state = AgentState()
 
@@ -13,10 +14,15 @@ while True:
 
     if state.query.lower() in ["exit", "quit"]:
         break
+    # Start a fresh workflow for this query
+    state.graph.reset()
 
     state.memory.add_user(state.query)
 
     print(state.memory.get_messages())
+
+    state.graph.transition(AgentStep.PLAN)
+    print(f"\nCurrent State : {state.graph.current_step.name}")
 
     state.plan = choose_tool(state.memory.get_messages())
 
@@ -29,12 +35,17 @@ while True:
         state.scratchpad.clear()
         continue
 
+    state.graph.transition(AgentStep.EXECUTE)
+    print(f"\nCurrent State : {state.graph.current_step.name}")
     # Initial input to the first tool
     current_input = state.query
 
     for step in state.plan["steps"]:
 
         execution_result = execute(step, current_input)
+
+        if not execution_result.success:
+            break
 
         # Safety check
         if not isinstance(execution_result, ExecutionResult):
@@ -52,6 +63,8 @@ while True:
         # -------------------------
         # Reflection Step
         # -------------------------
+        state.graph.transition(AgentStep.REFLECT)
+        print(f"\nCurrent State : {state.graph.current_step.name}")
         reflection_result = reflect(execution_result)
 
         print("\nReflection")
@@ -88,7 +101,8 @@ while True:
         print("\nReflection")
         print(reflection_result)
 
-    #state.result = current_input
+    state.graph.transition(AgentStep.FINISH)
+    print(f"\nCurrent State : {state.graph.current_step.name}")
     final_output = current_input
     state.result = final_output
 
