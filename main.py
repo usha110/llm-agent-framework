@@ -26,14 +26,7 @@ while True:
     for current_step in state.graph.run(state):
 
         if current_step == AgentStep.PLAN:
-
-            state.plan = choose_tool(state.memory.get_messages())
-
-            print(state.plan)
-
-            if not state.plan["steps"]:
-                state.result = "I couldn't determine an appropriate tool."
-                break
+            continue
 
         elif current_step == AgentStep.EXECUTE:
 

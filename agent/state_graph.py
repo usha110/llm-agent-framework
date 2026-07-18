@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from agent.planner import choose_tool
 
 
 class AgentStep(Enum):
@@ -28,6 +29,14 @@ class StateGraph:
         """
 
         self.transition(AgentStep.PLAN)
+
+        state.plan = choose_tool(state.memory.get_messages())
+
+        print(state.plan)
+
+        if not state.plan["steps"]:
+            state.result = "I couldn't determine an appropriate tool."
+            return
 
         yield AgentStep.PLAN
 
