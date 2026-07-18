@@ -98,12 +98,9 @@ while True:
 
         current_input = execution_result.output
 
-        print("\nReflection")
-        print(reflection_result)
-
     state.graph.transition(AgentStep.FINISH)
     print(f"\nCurrent State : {state.graph.current_step.name}")
-    final_output = current_input
+    final_output = current_input    
     state.result = final_output
 
     print("\nScratchpad")

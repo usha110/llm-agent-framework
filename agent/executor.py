@@ -1,5 +1,6 @@
 from agent.execution_result import ExecutionResult
 from tools.registry import TOOLS
+from pydantic import ValidationError
 
 MAX_RETRIES = 3
 
@@ -17,36 +18,43 @@ def execute(step, input_data):
             error="Tool not found"
         )
 
-    # Determine the input for the tool  
-    tool_input = (
-        arguments.get("query")
-        or arguments.get("expression")
-        or arguments.get("text")
-        or input_data
-    )
-
-    if tool_input is None:
-        tool_input = input_data
-
     print(f"Executing: {tool_name}")
-    print(f"Input: {tool_input}")
 
     last_error = None
 
+    # Validate input (no retry)
+    try:
+        validated_input = tool.input_model(**arguments)
+        print(f"Input: {validated_input.model_dump()}")
+    except ValidationError as e:
+        return ExecutionResult(
+        success=False,
+        tool=tool_name,
+        error=f"Input validation failed: {e}"
+        )
+    
+    
     for attempt in range(MAX_RETRIES):
 
-        try:
-            output  = tool.function(tool_input)
-            #output = tool.function(arguments or {"input": input_data})
+        try:          
+            output = tool.function(**validated_input.model_dump())
+            validated_output = tool.output_model(result=output)
 
-            print(f"Output: {output }")
+            print(f"Output: {validated_output.result}")
             
             return ExecutionResult(
                 success=True,
                 tool=tool_name,
-                output=output
+                output=validated_output.model_dump(),
             )
 
+        except ValidationError as e:
+            return ExecutionResult(
+            success=False,
+            tool=tool_name,
+            error=f"Output validation failed: {e}"
+            )
+        
         except Exception as e:
             last_error = str(e)
             print(f"Attempt {attempt + 1} failed: {e}")
