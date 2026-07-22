@@ -1,6 +1,7 @@
 from enum import Enum, auto
 from agent.planner import choose_tool
 from agent.executor import execute
+from agent.reflection import reflect
 
 
 class AgentStep(Enum):
@@ -24,10 +25,11 @@ class StateGraph:
         """
         Execute one iteration of the agent workflow.
 
-        Currently handles planning and tool execution.
-        Reflection and finalization remain in main.py
-        and will be moved into the graph in a later refactor.
-        """
+        Currently handles planning, execution,
+        and reflection.
+
+        Final response generation remains in main.py.
+        """ 
 
         # Plan
         self.transition(AgentStep.PLAN)
@@ -57,17 +59,24 @@ class StateGraph:
 
             state.last_execution = execution_result
 
-            current_input = execution_result.output
+            state.current_input = execution_result.output
 
-        state.current_input = current_input
+        # state.current_input = current_input
 
         yield AgentStep.EXECUTE
 
         # Reflect 
         self.transition(AgentStep.REFLECT)
 
+        reflection_result = reflect(state.last_execution)
+
+        print(reflection_result)
+
+        state.last_reflection = reflection_result
+
         yield AgentStep.REFLECT
 
+        # Finish 
         self.transition(AgentStep.FINISH)
 
         yield AgentStep.FINISH
