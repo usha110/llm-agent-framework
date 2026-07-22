@@ -19,6 +19,7 @@ class AgentState:
     result: str = ""
     last_execution = None
     last_reflection = None
+    current_input: str = ""
 
     memory: ConversationMemory = field(default_factory=ConversationMemory)
     scratchpad: Scratchpad = field(default_factory=Scratchpad)

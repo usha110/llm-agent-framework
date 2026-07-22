@@ -45,7 +45,8 @@ def execute(step, input_data):
             return ExecutionResult(
                 success=True,
                 tool=tool_name,
-                output=validated_output.model_dump(),
+                # output=validated_output.model_dump(),
+                output=validated_output.result
             )
 
         except ValidationError as e:

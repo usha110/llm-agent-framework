@@ -29,28 +29,24 @@ while True:
             continue
 
         elif current_step == AgentStep.EXECUTE:
-
-
-            for step in state.plan["steps"]:
-
-                execution_result = execute(step, current_input)
-
-                if not execution_result.success:
-                    current_input = execution_result.error
-                    break
-
-                state.last_execution = execution_result
-
-                current_input = execution_result.output
+            continue
 
         elif current_step == AgentStep.REFLECT:
 
             reflection_result = reflect(state.last_execution)
 
-            print(reflection_result)
+            print("\nReflection")
+            print(f"Should Retry : {reflection_result.should_retry}")
+            print(f"Reason       : {reflection_result.reason}")
+            print(f"Next Action  : {reflection_result.next_action}")
 
             state.last_reflection = reflection_result
 
         elif current_step == AgentStep.FINISH:
 
-            state.result = current_input
+            state.result = state.current_input
+
+    print(f"\nAssistant: {state.result}")
+
+    state.memory.add_assistant(state.result)
+    state.scratchpad.clear()

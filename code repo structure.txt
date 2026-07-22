@@ -55,3 +55,32 @@ python_agent/
     ├── calculator_example.py
     ├── summarizer_example.py
     └── multi_tool_example.py
+
+
+--------
+
+Phase 1
+---------
+✔ Calculator Tool
+✔ Web Search Tool
+✔ Summarizer Tool
+
+Phase 2
+---------
+✔ Tool Registry
+✔ Prompt
+✔ LLM Planner
+✔ Execute Selected Tool
+
+Phase 3
+---------
+✔ Conversation Memory
+✔ Multiple Tool Calls
+✔ Structured Outputs
+
+Phase 4
+---------
+✔ LangGraph
+✔ Stateful Agent
+✔ Retry/Fallback
+✔ Human Approval
